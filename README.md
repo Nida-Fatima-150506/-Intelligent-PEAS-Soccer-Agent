@@ -1,9 +1,4 @@
-Got you 👍
-Neeche **simple, clean aur ready-to-use README content** de rahi hoon. Ye GitHub ke liye perfect hai — na zyada lamba, na boring.
 
-Aap seedha **copy–paste** kar sakti/sakte ho 👇
-
----
 
 ### 📌 Project Description
 
