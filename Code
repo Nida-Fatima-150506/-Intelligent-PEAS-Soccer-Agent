@@ -1,0 +1,93 @@
+import random
+import time
+from IPython.display import clear_output
+
+class FootballAgent:
+    def __init__(self):
+        # Performance Measures
+        self.goals = 0
+        self.stamina = 100
+        
+        # Environment (Internal representation)
+        self.pitch_size = (10, 10)
+        self.agent_pos = [random.randint(0, 9), random.randint(0, 9)]
+        self.ball_pos = [random.randint(0, 9), random.randint(0, 9)]
+        self.goal_pos = [5, 0] # Goal is at the center-left
+        self.has_ball = False
+
+    def sense_environment(self):
+        """Sensors: Returns the state of the world."""
+        return {
+            "agent": self.agent_pos,
+            "ball": self.ball_pos,
+            "goal": self.goal_pos,
+            "has_ball": self.has_ball
+        }
+
+    def act(self, action):
+        """Actuators: Moves the player or kicks the ball."""
+        if action == "MOVE_TO_BALL":
+            if self.agent_pos[0] < self.ball_pos[0]: self.agent_pos[0] += 1
+            elif self.agent_pos[0] > self.ball_pos[0]: self.agent_pos[0] -= 1
+            if self.agent_pos[1] < self.ball_pos[1]: self.agent_pos[1] += 1
+            elif self.agent_pos[1] > self.ball_pos[1]: self.agent_pos[1] -= 1
+            
+        elif action == "MOVE_TO_GOAL":
+            if self.agent_pos[0] < self.goal_pos[0]: self.agent_pos[0] += 1
+            elif self.agent_pos[0] > self.goal_pos[0]: self.agent_pos[0] -= 1
+            if self.agent_pos[1] < self.goal_pos[1]: self.agent_pos[1] += 1
+            elif self.agent_pos[1] > self.goal_pos[1]: self.agent_pos[1] -= 1
+            # Ball moves with the player
+            self.ball_pos = list(self.agent_pos)
+
+        elif action == "SHOOT":
+            print("⚽ GOAL!!!")
+            self.goals += 1
+            self.has_ball = False
+            # Reset ball position
+            self.ball_pos = [random.randint(0, 9), random.randint(0, 9)]
+
+    def think(self, perception):
+        """The Brain: Decides the next action based on PEAS."""
+        ap = perception["agent"]
+        bp = perception["ball"]
+        gp = perception["goal"]
+        
+        # Logic: If at ball position, pick it up
+        if ap == bp and not self.has_ball:
+            self.has_ball = True
+            return "MOVE_TO_GOAL"
+        
+        # Logic: If has ball and at goal, shoot
+        if self.has_ball and ap == gp:
+            return "SHOOT"
+        
+        # Navigation logic
+        return "MOVE_TO_GOAL" if self.has_ball else "MOVE_TO_BALL"
+
+# --- Run Simulation ---
+player = FootballAgent()
+
+for step in range(20):
+    clear_output(wait=True)
+    state = player.sense_environment()
+    decision = player.think(state)
+    player.act(decision)
+    
+    # Visualization
+    print(f"Step: {step+1} | Action: {decision}")
+    print(f"Player Pos: {player.agent_pos} | Ball Pos: {player.ball_pos} | Has Ball: {player.has_ball}")
+    print(f"Scoreboard: {player.goals} Goals")
+    
+    # Simple Pitch Render
+    for y in range(10):
+        line = ""
+        for x in range(10):
+            if [x, y] == player.agent_pos: line += "🏃 "
+            elif [x, y] == player.ball_pos: line += "⚽ "
+            elif [x, y] == player.goal_pos: line += "🥅 "
+            else: line += ".  "
+        print(line)
+    
+    time.sleep(0.5)
+    
